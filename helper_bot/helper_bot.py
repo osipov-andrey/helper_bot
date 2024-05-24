@@ -49,7 +49,7 @@ async def process_photo(message: Message, state: FSMContext) -> None:
     if photos := message.photo:  # TODO: uncompressed files support
         await message.answer("Nice")
 
-        size = 3
+        size = 3  # TODO: size selection
         photo = await message.bot.get_file(photos[size].file_id)
         file_path = photo.file_path
         photo_content: io.BytesIO | None = await message.bot.download_file(file_path)
