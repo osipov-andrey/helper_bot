@@ -6,6 +6,8 @@ authors = ["Andrey A. Osipov <developer.osipov@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.12"
+aiogram = "^3.6.0"
+defaultenv = "^0.0.14"
 
 
 [tool.poetry.group.dev]
