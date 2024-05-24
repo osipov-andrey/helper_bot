@@ -60,7 +60,7 @@ async def process_photo(message: Message, state: FSMContext) -> None:
 
     else:
         await message.answer("This is not a photo!")
-        await state.clear()
+    await state.clear()
 
 
 async def main() -> None:
