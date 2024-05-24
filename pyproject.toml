@@ -8,6 +8,7 @@ authors = ["Andrey A. Osipov <developer.osipov@gmail.com>"]
 python = "^3.12"
 aiogram = "^3.6.0"
 defaultenv = "^0.0.14"
+pillow = "^10.3.0"
 
 
 [tool.poetry.group.dev]
