@@ -1,6 +1,5 @@
 import dataclasses
-import uuid
-from typing import Protocol
+from typing import Protocol, Any
 
 from memento.exceptions import MementoException
 
@@ -23,7 +22,14 @@ class Notification:
     when: str   # timestamp?
     reminded: bool = False
     text: str = ""
-    id: str = dataclasses.field(default_factory=lambda: str(uuid.uuid4()))
+    id: str | None = None
+
+    def __eq__(self, other: 'Notification') -> bool:
+        self_dict = dataclasses.asdict(self)
+        self_dict.pop("id")
+        other_dict = dataclasses.asdict(other)
+        other_dict.pop("id")
+        return self_dict == other_dict
 
 
 class NotificationsRepoInterface(Protocol):
@@ -40,7 +46,7 @@ class NotificationsRepoInterface(Protocol):
         """
         ...
 
-    async def get_notifications(self) -> tuple[Notification, ...]:
+    async def get_notifications(self, **kwargs: Any) -> tuple[Notification, ...]:
         """
         :raises NotificationNotFoundException
         """

@@ -9,6 +9,9 @@ python = "^3.12"
 aiogram = "^3.6.0"
 defaultenv = "^0.0.14"
 pillow = "^10.3.0"
+sqlalchemy = "^2.0.31"
+aiosqlite = "^0.20.0"
+greenlet = "^3.0.3"
 
 
 [tool.poetry.group.dev]
@@ -25,6 +28,7 @@ isort = "^5.13.2"
 types-requests = "^2.32.0"
 flake8-absolute-import = "^1.0"
 Faker = "^24.8.0"
+pytest-asyncio = "^0.23.8"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
