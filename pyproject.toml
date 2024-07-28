@@ -50,3 +50,9 @@ count = true
 
 [tool.mypy]
 plugins = ['sqlmypy']
+python_version = 3.12
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = "defaultenv.*"
+ignore_missing_imports = true
