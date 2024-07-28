@@ -1,17 +1,21 @@
 import os
 from pathlib import Path
+from typing import AsyncGenerator
 
 import pytest
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
 from memento.facade.repository.interface import Notification
-from memento.facade.repository.sqlite_repository.sqlite_repository import Base, SQLiteNotificationsRepo
+from memento.facade.repository.sqlite_repository.sqlite_repository import (
+    Base,
+    SQLiteNotificationsRepo,
+)
 
-TEST_DB_PATH = Path(__file__).parent.absolute().joinpath("db.sqlite")
+TEST_DB_PATH = Path(__file__).parent.absolute().joinpath("test_db.sqlite")
 
 
 @pytest.fixture
-async def sqlite_engine():
+async def sqlite_engine() -> AsyncGenerator[AsyncEngine, None]:
     engine = create_async_engine(
         f"sqlite+aiosqlite:///{TEST_DB_PATH}",
     )
@@ -24,14 +28,9 @@ async def sqlite_engine():
 
 
 @pytest.mark.asyncio
-async def test_create_notification(sqlite_engine):
-    notification = Notification(
-        username="oscar.kokoshca",
-        when="then",
-        reminded=False,
-        text="Wake up, samurai"
-    )
-    repo = SQLiteNotificationsRepo(TEST_DB_PATH)
+async def test_create_notification(sqlite_engine: AsyncEngine):
+    notification = Notification(username="oscar.kokoshca", when="then", reminded=False, text="Wake up, samurai")
+    repo = SQLiteNotificationsRepo(TEST_DB_PATH)  # type: ignore  # TODO delete this comment after fully implementation
 
     await repo.create_notification(notification)
     notifications = await repo.get_notifications()

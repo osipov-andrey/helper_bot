@@ -2,7 +2,10 @@ import asyncio
 
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from memento.facade.repository.sqlite_repository.sqlite_repository import Base, SQLITE_PATH
+from memento.facade.repository.sqlite_repository.sqlite_repository import (
+    SQLITE_PATH,
+    Base,
+)
 
 
 async def up():
@@ -15,7 +18,7 @@ async def down():
         await conn.run_sync(Base.metadata.drop_all)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     engine = create_async_engine(
         f"sqlite+aiosqlite:///{SQLITE_PATH}",
     )

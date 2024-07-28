@@ -1,7 +1,7 @@
 import asyncio
-import io
 import logging
 import sys
+from typing import BinaryIO
 
 from aiogram import Bot, Dispatcher, F, html
 from aiogram.client.default import DefaultBotProperties
@@ -19,6 +19,9 @@ TOKEN = env("BOT_TOKEN")
 dp = Dispatcher()
 
 
+class UnknownBotException(BaseException): ...
+
+
 class MainMenu(StatesGroup):
     photo = State()
 
@@ -32,7 +35,8 @@ async def command_start_handler(message: Message) -> None:
     """
     This handler receives messages with `/start` command
     """
-    await message.answer(f"Hello, {html.bold(message.from_user.full_name)}!\n\nMain menu: \n{_generate_main_menu()}")
+    username = message.from_user.full_name if message.from_user else "Username"
+    await message.answer(f"Hello, {html.bold(username)}!\n\nMain menu: \n{_generate_main_menu()}")
 
 
 @dp.message(F.text.casefold() == "/photo")
@@ -46,18 +50,24 @@ async def command_photo_handler(message: Message, state: FSMContext) -> None:
 
 @dp.message(MainMenu.photo)
 async def process_photo(message: Message, state: FSMContext) -> None:
+    if not message.bot:
+        raise UnknownBotException("There is no 'Bot' instance in the message!")
     if photos := message.photo:  # TODO: uncompressed files support
         await message.answer("Nice")
 
         size = 3  # TODO: size selection
         photo = await message.bot.get_file(photos[size].file_id)
-        file_path = photo.file_path
-        photo_content: io.BytesIO | None = await message.bot.download_file(file_path)
-
-        for image_part in get_triptych(photo_content):
-            file = BufferedInputFile(image_part.getvalue(), filename=f"{photo.file_unique_id}_{image_part.name}.jpg")
-            await message.bot.send_photo(message.chat.id, file)
-
+        if file_path := photo.file_path:
+            photo_content: BinaryIO | None = await message.bot.download_file(file_path)
+        else:
+            raise UnknownBotException("There is no 'file_path' in the message!")
+        if photo_content:
+            for image_part in get_triptych(photo_content):
+                file = BufferedInputFile(
+                    image_part.getvalue(), filename=f"{photo.file_unique_id}_{image_part.name}.jpg"
+                )
+                await message.bot.send_photo(message.chat.id, file)
+            await message.answer("There is no 'photo_content' in the message!")
     else:
         await message.answer("This is not a photo!")
     await state.clear()

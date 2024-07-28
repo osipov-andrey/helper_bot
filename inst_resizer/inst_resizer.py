@@ -1,6 +1,6 @@
 from io import BytesIO
 from pathlib import Path
-from typing import Tuple
+from typing import BinaryIO, Tuple
 
 from PIL.Image import Image, new, open
 
@@ -28,7 +28,7 @@ def expand_image(image_: Image, background_color: Color = IVORY) -> Image:
     return new_image
 
 
-def get_triptych(source: BytesIO) -> tuple[BytesIO, BytesIO, BytesIO]:
+def get_triptych(source: BinaryIO) -> tuple[BytesIO, BytesIO, BytesIO]:
     with open(source) as image:
         left_part, right_part = split_vertically(image)
         exp_image = expand_image(image)

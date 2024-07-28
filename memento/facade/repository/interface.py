@@ -1,30 +1,29 @@
 import dataclasses
-from typing import Protocol, Any
+from typing import Any, Protocol
 
 from memento.exceptions import MementoException
 
 
-class NotificationRepoException(MementoException):
-    ...
+class NotificationRepoException(MementoException): ...
 
 
-class NotificationAlreadyExistsException(NotificationRepoException):
-    ...
+class NotificationAlreadyExistsException(NotificationRepoException): ...
 
 
-class NotificationNotFoundException(NotificationRepoException):
-    ...
+class NotificationNotFoundException(NotificationRepoException): ...
 
 
 @dataclasses.dataclass
 class Notification:
     username: str
-    when: str   # timestamp?
+    when: str  # timestamp?
     reminded: bool = False
     text: str = ""
     id: str | None = None
 
-    def __eq__(self, other: 'Notification') -> bool:
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, Notification):
+            return NotImplemented
         self_dict = dataclasses.asdict(self)
         self_dict.pop("id")
         other_dict = dataclasses.asdict(other)
@@ -52,5 +51,4 @@ class NotificationsRepoInterface(Protocol):
         """
         ...
 
-    async def delete_notification(self, **kwargs) -> None:
-        ...
+    async def delete_notification(self, **kwargs) -> None: ...

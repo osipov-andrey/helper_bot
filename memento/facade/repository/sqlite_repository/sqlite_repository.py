@@ -1,17 +1,17 @@
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import Integer, Column, String, Boolean, select
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy import Boolean, Column, Integer, String, select
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import declarative_base, sessionmaker  # type: ignore  # mypy works bad with sqlalchemy
 
-from memento.facade.repository.interface import NotificationsRepoInterface, Notification
+from memento.facade.repository.interface import Notification, NotificationsRepoInterface
 
 SQLITE_PATH = Path(__file__).parent.absolute().joinpath("db.sqlite")
 Base = declarative_base()
 
 
-class _NotificationORM(Base):
+class _NotificationORM(Base):  # type: ignore  # mypy works bad with sqlalchemy
     __tablename__ = "notification"
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String)
@@ -37,7 +37,7 @@ class SQLiteNotificationsRepo(NotificationsRepoInterface):
                             username=notification.username,
                             when=notification.when,
                             reminded=notification.reminded,
-                            text=notification.text
+                            text=notification.text,
                         ),
                     ]
                 )
@@ -48,12 +48,9 @@ class SQLiteNotificationsRepo(NotificationsRepoInterface):
         async with async_session() as session:
             async with session.begin():
                 result = await session.execute(select(_NotificationORM).order_by(_NotificationORM.id))  # TODO: options
-                return tuple((
-                    Notification(
-                        id=n.id,
-                        username=n.username,
-                        when=n.when,
-                        reminded=n.reminded,
-                        text=n.text
-                    ) for n in result.scalars()
-                ))
+                return tuple(
+                    (
+                        Notification(id=n.id, username=n.username, when=n.when, reminded=n.reminded, text=n.text)
+                        for n in result.scalars()
+                    )
+                )

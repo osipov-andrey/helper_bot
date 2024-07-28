@@ -29,17 +29,24 @@ types-requests = "^2.32.0"
 flake8-absolute-import = "^1.0"
 Faker = "^24.8.0"
 pytest-asyncio = "^0.23.8"
+flake8-pyproject = "^1.2.3"
+sqlalchemy-stubs = "^0.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
 [tool.black]
 line-length = 120
 target-version = ['py312']
 
-[flake8]
-extend-ignore = 'E203'
+[tool.flake8]
+ignore = ['E203', 'E231', 'E701', 'E704']
 max-line-length = 120
 count = true
-statistics = true
+
+[tool.mypy]
+plugins = ['sqlmypy']
