@@ -3,9 +3,13 @@ from typing import Any
 
 from sqlalchemy import Boolean, Column, Integer, String, select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, sessionmaker  # type: ignore  # mypy works bad with sqlalchemy
+from sqlalchemy.orm import (  # type: ignore  # mypy works bad with sqlalchemy
+    declarative_base,
+    sessionmaker,
+)
 
-from memento.facade.repository.interface import Notification, NotificationsRepoInterface
+from memento.facade.repository.interface import NotificationsRepoInterface
+from memento.notification import Notification
 
 SQLITE_PATH = Path(__file__).parent.absolute().joinpath("db.sqlite")
 Base = declarative_base()
@@ -44,10 +48,14 @@ class SQLiteNotificationsRepo(NotificationsRepoInterface):
         await session.commit()
 
     async def get_notifications(self, **kwargs: Any) -> tuple[Notification, ...]:
+        _select = select(_NotificationORM).order_by(_NotificationORM.id)
+        if kwargs.get("reminded") is False:
+            _select = _select.where(_NotificationORM.reminded is False)
+
         async_session = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession)
         async with async_session() as session:
             async with session.begin():
-                result = await session.execute(select(_NotificationORM).order_by(_NotificationORM.id))  # TODO: options
+                result = await session.execute(_select)  # TODO: options
                 return tuple(
                     (
                         Notification(id=n.id, username=n.username, when=n.when, reminded=n.reminded, text=n.text)

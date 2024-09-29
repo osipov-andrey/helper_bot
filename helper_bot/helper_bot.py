@@ -13,6 +13,11 @@ from aiogram.types import BufferedInputFile, Message
 from defaultenv import env
 
 from inst_resizer.inst_resizer import get_triptych
+from memento.events_consumer.rabbit_mq_consumer import (
+    RabbitMQEventsConsumer,
+    RabbitMQSettings,
+)
+from memento.facade.repository.sqlite_repository import SQLiteNotificationsRepo
 
 TOKEN = env("BOT_TOKEN")
 
@@ -73,13 +78,20 @@ async def process_photo(message: Message, state: FSMContext) -> None:
     await state.clear()
 
 
-async def main() -> None:
-    # Initialize Bot instance with default bot properties which will be passed to all API calls
-    bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-    # And the run events dispatching
+async def start_bot(bot: Bot) -> None:
     await dp.start_polling(bot)
 
 
-if __name__ == "__main__":
+async def main():
+    # Initialize Bot instance with default bot properties which will be passed to all API calls
+    bot_ = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    repo = SQLiteNotificationsRepo()
+    consumer = RabbitMQEventsConsumer(bot_, repo, RabbitMQSettings())
+
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+
+    await asyncio.gather(start_bot(bot_), consumer.run())  # TODO: move consumer to an another process?
+
+
+if __name__ == "__main__":
     asyncio.run(main())
