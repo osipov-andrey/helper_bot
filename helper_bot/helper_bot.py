@@ -57,7 +57,7 @@ async def command_photo_handler(message: Message, state: FSMContext) -> None:
 async def process_photo(message: Message, state: FSMContext) -> None:
     if not message.bot:
         raise UnknownBotException("There is no 'Bot' instance in the message!")
-    if photos := message.photo:  # TODO: uncompressed files support
+    if photos := message.photo:
         await message.answer("Nice")
 
         size = 3  # TODO: size selection
@@ -72,7 +72,21 @@ async def process_photo(message: Message, state: FSMContext) -> None:
                     image_part.getvalue(), filename=f"{photo.file_unique_id}_{image_part.name}.jpg"
                 )
                 await message.bot.send_photo(message.chat.id, file)
+        else:
             await message.answer("There is no 'photo_content' in the message!")
+    elif document := message.document:
+        if document.mime_type != "image/jpeg":
+            await message.answer("This document is not an image!")
+            return
+        await message.answer("Mmm, unzipped image! Very well!")
+        if document_content := await message.bot.download(document.file_id):
+            for image_part in get_triptych(document_content):
+                file = BufferedInputFile(
+                    image_part.getvalue(), filename=f"{document.file_unique_id}_{image_part.name}.jpg"
+                )
+                await message.bot.send_document(message.chat.id, file)
+        else:
+            await message.answer("There is no 'document_content' in the message!")
     else:
         await message.answer("This is not a photo!")
     await state.clear()

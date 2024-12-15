@@ -5,7 +5,7 @@ from typing import BinaryIO, Tuple
 from PIL.Image import Image, new, open
 
 Color = Tuple[int, int, int]
-IVORY: Color = (36, 35, 43)
+BLACK: Color = (0, 0, 0)
 
 
 def get_filepath(file_name_: str) -> Path:
@@ -20,7 +20,7 @@ def split_vertically(image_: Image) -> Tuple[Image, Image]:
     return left_part_, right_part_
 
 
-def expand_image(image_: Image, background_color: Color = IVORY) -> Image:
+def expand_image(image_: Image, background_color: Color = BLACK) -> Image:
     width, height = image_.size
     new_height = 2 * height
     new_image = new(image_.mode, (width, new_height), background_color)
